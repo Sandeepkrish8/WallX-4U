@@ -3,11 +3,24 @@
 import { useRef, useEffect } from 'react'
 import gsap from 'gsap'
 import { categories } from '@/data/wallpapers'
+import {
+  LayoutGrid, Leaf, Rocket, Car, Sparkles, Minus,
+  Building2, PawPrint, Tv2,
+} from 'lucide-react'
 
-/**
- * CategoryFilter — animated pill-button row for filtering by category.
- * Slides in from the left on mount with GSAP stagger.
- */
+// Per-category icon map
+const ICONS = {
+  All:          LayoutGrid,
+  Nature:       Leaf,
+  Space:        Rocket,
+  Cars:         Car,
+  Abstract:     Sparkles,
+  Minimal:      Minus,
+  Architecture: Building2,
+  Animals:      PawPrint,
+  Anime:        Tv2,
+}
+
 export default function CategoryFilter({ selected, onChange }) {
   const containerRef = useRef(null)
 
@@ -17,14 +30,15 @@ export default function CategoryFilter({ selected, onChange }) {
     const pills = containerRef.current.querySelectorAll('.category-pill')
     gsap.fromTo(
       pills,
-      { opacity: 0, y: 16 },
+      { opacity: 0, y: 14, scale: 0.9 },
       {
         opacity: 1,
         y: 0,
-        duration: 0.45,
-        ease: 'power2.out',
-        stagger: 0.06,
-        delay: 0.2,
+        scale: 1,
+        duration: 0.4,
+        ease: 'back.out(1.5)',
+        stagger: 0.05,
+        delay: 0.15,
       }
     )
   }, [])
@@ -38,16 +52,18 @@ export default function CategoryFilter({ selected, onChange }) {
     >
       {categories.map((cat) => {
         const active = selected === cat
+        const Icon = ICONS[cat] ?? LayoutGrid
         return (
           <button
             key={cat}
             onClick={() => onChange(cat)}
-            className={`category-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+            className={`category-pill flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
               active
-                ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/30 scale-105'
-                : 'bg-white/[0.06] text-zinc-400 hover:bg-white/10 hover:text-white border border-white/10'
+                ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/40 scale-[1.04]'
+                : 'bg-white/[0.05] text-zinc-400 hover:bg-white/[0.09] hover:text-zinc-100 border border-white/[0.08]'
             }`}
           >
+            <Icon size={13} strokeWidth={active ? 2.5 : 1.8} />
             {cat}
           </button>
         )

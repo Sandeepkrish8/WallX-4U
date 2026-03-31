@@ -2,81 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── CSS custom properties ── */
+:root {
+  --bg-base:    #080808;
+  --bg-card:    #111111;
+  --bg-overlay: rgba(8, 8, 8, 0.94);
+  --accent:     #7c3aed;
+  --accent-dim: rgba(124, 58, 237, 0.15);
+  --border:     rgba(255, 255, 255, 0.06);
+}
+
 /* ── Custom scrollbar ── */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #0a0a0a;
-}
+::-webkit-scrollbar       { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
 ::-webkit-scrollbar-thumb {
   background: #3f3f46;
-  border-radius: 3px;
+  border-radius: 4px;
+  transition: background 0.2s;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #7c3aed;
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ── Selection ── */
+::selection {
+  background: rgba(124, 58, 237, 0.35);
+  color: #fff;
 }
 
 /* ── Base ── */
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 body {
-  background-color: #0a0a0a;
+  background-color: var(--bg-base);
   color: #ffffff;
 }
 
-/* ── GSAP initial state: items start hidden, GSAP animates them in ── */
+/* ── GSAP: items start invisible; GSAP animates them in ── */
 .masonry-item {
   will-change: opacity, transform;
 }
 
-/* ── Glass effect for cards / navbar ── */
+/* ── Glass effect ── */
 .glass {
-  background: rgba(22, 22, 22, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(17, 17, 17, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
 }
 
-/* ── Gradient text utility ── */
+/* ── Gradient text ── */
 .gradient-text {
-  background: linear-gradient(135deg, #a78bfa 0%, #6366f1 100%);
+  background: linear-gradient(135deg, #a78bfa 0%, #6366f1 50%, #818cf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ── Page fade-in animation ── */
+/* ── Gradient text warm variant ── */
+.gradient-text-warm {
+  background: linear-gradient(135deg, #f472b6 0%, #a78bfa 60%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Page fade-up animation ── */
 @keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+.fade-up { animation: fadeUp 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
 
-.fade-up {
-  animation: fadeUp 0.6s ease forwards;
-}
-
-/* ── Loading skeleton pulse ── */
+/* ── Loading skeleton shimmer ── */
 @keyframes shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
+  0%   { background-position: -800px 0; }
+  100% { background-position:  800px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #171717 25%, #222222 50%, #171717 75%);
+  background-size: 1600px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
 }
 
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    #1e1e1e 25%,
-    #2a2a2a 50%,
-    #1e1e1e 75%
-  );
-  background-size: 800px 100%;
-  animation: shimmer 1.5s infinite;
+/* ── Subtle radial glow helper ── */
+.glow-violet {
+  box-shadow: 0 0 80px 20px rgba(124, 58, 237, 0.12);
+}
+
+/* ── Noise texture overlay for depth ── */
+.noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  border-radius: inherit;
 }
