@@ -1,6 +1,7 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
 import { SearchProvider } from '@/context/SearchContext'
+import { AuthProvider }   from '@/context/AuthContext'
 import Navbar from '@/components/Navbar'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
@@ -19,10 +20,12 @@ export default function RootLayout({ children }) {
           so both Navbar (search input) and Home page (filter logic) share
           the same query state without prop drilling.
         */}
-        <SearchProvider>
-          <Navbar />
-          <main>{children}</main>
-        </SearchProvider>
+        <AuthProvider>
+          <SearchProvider>
+            <Navbar />
+            <main>{children}</main>
+          </SearchProvider>
+        </AuthProvider>
       </body>
     </html>
   )

@@ -2,17 +2,33 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Layers, Menu, X, Search, Compass, Upload as UploadIcon, Home as HomeIcon } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { Layers, Menu, X, Search, Compass, Upload as UploadIcon, Home as HomeIcon, LogIn, UserPlus, LogOut, User as UserIcon, Settings, ChevronDown } from 'lucide-react'
 import gsap from 'gsap'
 import { useSearch } from '@/context/SearchContext'
+import { useAuth } from '@/context/AuthContext'
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  const navRef = useRef(null)
-  const pathname = usePathname()
+  const [scrolled, setScrolled]     = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const navRef      = useRef(null)
+  const userMenuRef = useRef(null)
+  const pathname    = usePathname()
+  const router      = useRouter()
   const { query, setQuery } = useSearch()
+  const { user, signOut }   = useAuth()
+
+  // Close user menu on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
   // Detect scroll to trigger glass effect
   useEffect(() => {
@@ -46,6 +62,9 @@ export default function Navbar() {
     { href: '/explore', label: 'Explore', icon: Compass },
     { href: '/upload', label: 'Upload', icon: UploadIcon },
   ]
+
+  // Don't render navbar on full-page auth routes
+  if (pathname === '/signin' || pathname === '/signup') return null
 
   return (
     <nav
@@ -90,6 +109,79 @@ export default function Navbar() {
                 </Link>
               )
             })}
+
+            {/* Divider */}
+            <div className="w-px h-5 bg-white/10 mx-2" />
+
+            {user ? (
+              /* ── User avatar + dropdown ── */
+              <div ref={userMenuRef} className="relative">
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/[0.14] transition-all duration-200"
+                >
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="w-7 h-7 rounded-lg object-cover bg-zinc-800"
+                  />
+                  <span className="text-sm text-zinc-200 font-medium max-w-[90px] truncate">
+                    {user.name.split(' ')[0]}
+                  </span>
+                  <ChevronDown
+                    size={13}
+                    className={`text-zinc-500 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {/* Dropdown */}
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-52 rounded-2xl border border-white/[0.08] bg-[#111]/95 backdrop-blur-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
+                    <div className="px-4 py-3 border-b border-white/[0.06]">
+                      <p className="text-sm font-semibold text-white truncate">{user.name}</p>
+                      <p className="text-xs text-zinc-500 truncate mt-0.5">{user.email}</p>
+                    </div>
+                    <div className="py-1.5">
+                      <button className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-zinc-300 hover:text-white hover:bg-white/[0.05] transition-colors">
+                        <UserIcon size={13} className="text-zinc-500" />
+                        Profile
+                      </button>
+                      <button className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-zinc-300 hover:text-white hover:bg-white/[0.05] transition-colors">
+                        <Settings size={13} className="text-zinc-500" />
+                        Settings
+                      </button>
+                    </div>
+                    <div className="py-1.5 border-t border-white/[0.06]">
+                      <button
+                        onClick={() => { signOut(); setUserMenuOpen(false); router.push('/') }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/[0.06] transition-colors"
+                      >
+                        <LogOut size={13} />
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* ── Auth buttons ── */
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/signin"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all duration-200"
+                >
+                  <LogIn size={14} />
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white transition-all duration-200 shadow-md shadow-violet-500/20 hover:shadow-violet-500/35 hover:-translate-y-0.5"
+                >
+                  <UserPlus size={14} />
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Mobile toggle */}
@@ -125,6 +217,47 @@ export default function Navbar() {
                 {label}
               </Link>
             ))}
+
+            {/* Mobile auth */}
+            <div className="pt-2 border-t border-white/[0.06] mt-2 space-y-0.5">
+              {user ? (
+                <>
+                  <div className="flex items-center gap-3 px-3 py-2.5">
+                    <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-lg bg-zinc-800" />
+                    <div>
+                      <p className="text-sm font-medium text-white">{user.name}</p>
+                      <p className="text-xs text-zinc-500">{user.email}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => { signOut(); setMobileOpen(false); router.push('/') }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-500/[0.06] transition-colors"
+                  >
+                    <LogOut size={15} />
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/signin"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5"
+                  >
+                    <LogIn size={15} />
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/signup"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-violet-300 bg-violet-500/10 hover:bg-violet-500/20"
+                  >
+                    <UserPlus size={15} />
+                    Create Account
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>
