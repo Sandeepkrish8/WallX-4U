@@ -13,6 +13,25 @@ function fmt(n) {
 export default function WallpaperCard({ wallpaper, isLiked, onLike }) {
   const [loaded, setLoaded] = useState(false)
   const [dlFlash, setDlFlash] = useState(false)
+  const [imgError, setImgError] = useState(false)
+
+  // Fallback: pick a reliable Unsplash placeholder keyed to the category
+  const CATEGORY_FALLBACKS = {
+    Nature:       'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80',
+    Space:        'https://images.unsplash.com/photo-1462332420958-a05d1e002413?auto=format&fit=crop&w=800&q=80',
+    Cars:         'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=800&q=80',
+    Abstract:     'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=800&q=80',
+    Minimal:      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+    Architecture: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=800&q=80',
+    Animals:      'https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=800&q=80',
+    Anime:        'https://images.unsplash.com/photo-1540959733-676dc65f6d6d?auto=format&fit=crop&w=800&q=80',
+    Cyberpunk:    'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80',
+    Ocean:        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+    Fantasy:      'https://images.unsplash.com/photo-1485841890310-6a055c88698a?auto=format&fit=crop&w=800&q=80',
+    Gaming:       'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+    Dark:         'https://images.unsplash.com/photo-1476673160081-cf065607f449?auto=format&fit=crop&w=800&q=80',
+  }
+  const fallbackSrc = CATEGORY_FALLBACKS[wallpaper.category] || CATEGORY_FALLBACKS.Nature
 
   // Download: fetch blob → trigger anchor, fallback to new tab
   const handleDownload = useCallback(
@@ -59,10 +78,11 @@ export default function WallpaperCard({ wallpaper, isLiked, onLike }) {
 
         {/* Wallpaper image — zoom on hover */}
         <img
-          src={wallpaper.thumbnail}
+          src={imgError ? fallbackSrc : wallpaper.thumbnail}
           alt={wallpaper.title}
           loading="lazy"
           onLoad={() => setLoaded(true)}
+          onError={() => { setImgError(true); setLoaded(true) }}
           className={`w-full block transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-[1.08] ${
             loaded ? 'opacity-100' : 'absolute inset-0 opacity-0'
           }`}

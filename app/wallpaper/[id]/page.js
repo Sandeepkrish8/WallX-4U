@@ -130,6 +130,7 @@ export default function WallpaperDetails() {
             alt={wallpaper.title}
             className={`w-full max-h-[70vh] object-cover transition-opacity duration-500 ${imgLoaded ? 'opacity-100' : 'opacity-0 absolute inset-0'}`}
             onLoad={() => setImgLoaded(true)}
+            onError={(e) => { e.target.src = wallpaper.thumbnail; setImgLoaded(true) }}
           />
           {/* Category badge on image */}
           <div className="absolute top-4 left-4">
